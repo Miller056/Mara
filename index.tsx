@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom/client";
 
-import  { GoogleGenerativeAI } from "@google/generative-ai";
+// AI calls go through our local backend to avoid exposing API keys in the browser.
 
 import { Session } from "./types";
 import { INITIAL_PLACEHOLDERS } from "./constants";
@@ -113,67 +113,27 @@ function App() {
   const handleTts = async (text: string, id: string) => {
     if (isTtsPlaying === id) {
       setIsTtsPlaying(null);
-      return <h1>Stop</h1>;
+      window.speechSynthesis?.cancel();
+      return;
     }
    
 
     setIsTtsPlaying(id);
 
     try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioContext();
-      }
+      if (!("speechSynthesis" in window)) throw new Error("No speech support");
 
-      if (audioCtxRef.current.state === "suspended") {
-        await audioCtxRef.current.resume();
-      }
-
-      const genAI = new GoogleGenerativeAI(
-        import.meta.env.VITE_API_KEY
-      );
-
-      const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash"
-      });
-
-      const result = await model.generateContent({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: `Speak gently: ${text}` }]
-          }
-        ],
-        config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: "Kore" }
-            }
-          }
-        }
-      });
-
-      const base64 =
-        result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-
-      if (!base64) throw new Error("No audio");
-
-      const buffer = await decodeAudioData(
-        decode(base64),
-        audioCtxRef.current,
-        24000,
-        1
-      );
-
-      const src = audioCtxRef.current.createBufferSource();
-      src.buffer = buffer;
-      src.connect(audioCtxRef.current.destination);
-
-      src.onended = () => {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.95;
+      utter.pitch = 1.0;
+      utter.onend = () => {
         if (mountedRef.current) setIsTtsPlaying(null);
       };
-
-      src.start();
+      utter.onerror = () => {
+        if (mountedRef.current) setIsTtsPlaying(null);
+      };
+      window.speechSynthesis.speak(utter);
     } catch {
       if (mountedRef.current) setIsTtsPlaying(null);
     }
@@ -202,25 +162,20 @@ function App() {
     ]);
 
     try {
-      const ai = new GoogleGenAI({
-        apiKey: import.meta.env.VITE_API_KEY
+      const res = await fetch("http://localhost:5000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: text }],
+          language: "en"
+        })
       });
 
-      const res = await ai.models.generateContent({
-        model: "gemini-3-pro-preview",
-        contents: {
-          role: "user",
-          parts: [
-            {
-              text:
-                "Respond as a compassionate therapist in 1–2 sentences: " +
-                text
-            }
-          ]
-        }
-      });
-
-      const reply = res.text ?? "I am here with you.";
+      const data = await res.json();
+      const reply =
+        typeof data?.reply === "string" && data.reply.trim()
+          ? data.reply
+          : "I am here with you.";
 
       setSessions((s) =>
         s.map((x) => (x.id === id ? { ...x, insight: reply } : x))

@@ -1,0 +1,111 @@
+/* Basic layout for the ADHCI app */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #050816;
+  color: #f9fafb;
+}
+
+#root {
+  height: 100%;
+}
+
+.immersive-app {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.stage-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  padding-bottom: 7rem;
+}
+
+.message-pair {
+  margin-bottom: 1.25rem;
+}
+
+.user-message {
+  max-width: 60%;
+  margin-left: auto;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1.25rem;
+  background: #1f2937;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.ai-insight-bubble {
+  max-width: 70%;
+  padding: 1rem 1.25rem;
+  border-radius: 1.25rem;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.8);
+  font-size: 0.9rem;
+  color: #e5e7eb;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ai-insight-bubble button {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  border: none;
+  background: transparent;
+  color: #facc15;
+  cursor: pointer;
+}
+
+.ai-insight-bubble span {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  align-self: flex-end;
+}
+
+.floating-input-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1.25rem 1.5rem 1.75rem;
+  background: linear-gradient(to top, #020617, transparent);
+  display: flex;
+  justify-content: center;
+}
+
+.floating-input-container input {
+  flex: 1;
+  max-width: 640px;
+  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.85);
+  color: #f9fafb;
+  outline: none;
+}
+
+.floating-input-container button {
+  margin-left: 0.75rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: none;
+  background: radial-gradient(circle at 0 0, #f97316, #e11d48);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
